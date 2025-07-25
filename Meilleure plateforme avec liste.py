@@ -3,15 +3,19 @@ import pandas as pd
 from itertools import combinations
 from datetime import datetime
 import os
+import uuid
+
+# --- Création d'un ID unique par utilisateur (session) ---
+if "session_id" not in st.session_state:
+    st.session_state.session_id = str(uuid.uuid4())  # ex: 'c4e9...'
 
 # --- Fonction pour logger les actions ---
 def log_action(action, value):
     """
-    Enregistre une action utilisateur dans un fichier local.
-    (Attention : sur Streamlit Cloud, ce fichier sera réinitialisé au redéploiement.)
+    Enregistre une action utilisateur avec un identifiant unique dans un fichier local.
     """
     with open("user_logs.csv", "a", encoding="utf-8") as f:
-        f.write(f"{datetime.now()},{action},{value}\n")
+        f.write(f"{datetime.now()},{st.session_state.session_id},{action},{value}\n")
 
 @st.cache_data
 def load_data(path):
@@ -76,6 +80,7 @@ csv_url = "https://raw.githubusercontent.com/lenalaq/platform/main/dataset_pour_
 df = load_data(csv_url)
 
 st.title("Trouvez la plateforme qui correspond le plus à vos critères")
+st.write(f"**Votre identifiant de session : {st.session_state.session_id}**")
 
 if "decade" not in st.session_state:
     st.session_state.decade = None
