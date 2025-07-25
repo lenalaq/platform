@@ -80,7 +80,6 @@ csv_url = "https://raw.githubusercontent.com/lenalaq/platform/main/dataset_pour_
 df = load_data(csv_url)
 
 st.title("Trouvez la plateforme qui correspond le plus à vos critères")
-st.write(f"**Votre identifiant de session : {st.session_state.session_id}**")
 
 if "decade" not in st.session_state:
     st.session_state.decade = None
