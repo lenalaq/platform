@@ -61,8 +61,8 @@ def get_selected_pairs(selected_dict):
     return list(combinations(keys, 2))
 
 # --- MAIN ---
-csv_path = r"C:\Users\llaqueyrer\OneDrive - Université Paris 1 Panthéon-Sorbonne\Documents\Universcine cartographie\dataset_pour_analyse_clean.csv"
-df = load_data(csv_path)
+csv_url = "https://raw.githubusercontent.com/lenalaq/platform/main/dataset_pour_analyse_clean.csv"
+df = load_data(csv_url)
 
 st.title("Trouvez la plateforme qui correspond le plus à vos critères")
 
