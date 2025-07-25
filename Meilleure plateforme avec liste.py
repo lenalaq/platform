@@ -1,7 +1,8 @@
 import streamlit as st
 import pandas as pd
 from itertools import combinations
-from datetime import datetime  # <<< MANQUAIT
+from datetime import datetime
+import os
 
 # --- Fonction pour logger les actions ---
 def log_action(action, value):
@@ -20,7 +21,7 @@ def load_data(path):
     df = df[df['main_country'] != '0']
     df = df[df['genre_hierarchie'] != 'short']
     df = df[~df['plateforme'].str.lower().isin(['canal+', 'm6'])]
-
+    
     df['year'] = pd.to_numeric(df['year'], errors='coerce')
     df = df.dropna(subset=['year'])
     df['year'] = df['year'].astype(int)
@@ -40,8 +41,13 @@ def button_grid(options, key_prefix, selected_value):
         cols = st.columns(n_cols)
         for j, option in enumerate(options[i*n_cols:(i+1)*n_cols]):
             btn_key = f"{key_prefix}_{i}_{j}"
+            if option == selected_value:
+                style = 'background-color: #4CAF50; color: white; font-weight: bold;'
+            else:
+                style = ''
             if cols[j].button(str(option), key=btn_key):
                 selected = option if option != selected_value else None
+                log_action(f"select_{key_prefix}", option)
     return selected
 
 def filter_data(df, decade=None, country=None, genre=None):
@@ -81,8 +87,6 @@ if "genre" not in st.session_state:
 # --- Sélection Décennie ---
 st.subheader("Décennie")
 decade_selected = button_grid(sorted(df['decade'].unique()), "decade", st.session_state.decade)
-if decade_selected != st.session_state.decade:
-    log_action("select_decade", decade_selected)
 st.session_state.decade = decade_selected
 if decade_selected:
     st.write(f"Décennie sélectionnée : **{decade_selected}**")
@@ -90,8 +94,6 @@ if decade_selected:
 # --- Sélection Pays ---
 st.subheader("Pays")
 country_selected = button_grid(sorted(df['main_country'].unique()), "country", st.session_state.country)
-if country_selected != st.session_state.country:
-    log_action("select_country", country_selected)
 st.session_state.country = country_selected
 if country_selected:
     st.write(f"Pays sélectionné : **{country_selected}**")
@@ -99,15 +101,13 @@ if country_selected:
 # --- Sélection Genre ---
 st.subheader("Genre")
 genre_selected = button_grid(sorted(df['genre_hierarchie'].unique()), "genre", st.session_state.genre)
-if genre_selected != st.session_state.genre:
-    log_action("select_genre", genre_selected)
 st.session_state.genre = genre_selected
 if genre_selected:
     st.write(f"Genre sélectionné : **{genre_selected}**")
 
 # --- Bouton reset ---
 if st.button("Réinitialiser la sélection"):
-    log_action("button_click", "reset_selection")
+    log_action("button_click", "Réinitialiser la sélection")
     st.session_state.decade = None
     st.session_state.country = None
     st.session_state.genre = None
@@ -129,6 +129,7 @@ if top_platform is not None:
     st.success(f"Plateforme la plus fréquente (sur tous les critères) : **{top_platform}**")
     st.write(f"Exemple de film : {example_title}")
     st.write(f"Sur l'ensemble des catalogues, cela représente {nb_films} films.")
+    
 else:
     st.warning("Aucun film ne correspond aux 3 critères sélectionnés.")
     st.info("Recherche de la meilleure plateforme avec critères combinés 2 à 2...")
@@ -161,7 +162,7 @@ else:
 if not df_filtered.empty:
     st.markdown("---")
     if st.button("Visualiser tous les films qui répondent à ces critères"):
-        log_action("button_click", "visualiser_films")
+        log_action("button_click", "Visualiser tous les films")
         st.write(f"**{len(df_filtered)} films trouvés :**")
         st.dataframe(df_filtered[['title', 'year', 'main_country', 'genre_hierarchie', 'plateforme']])
 
@@ -173,4 +174,15 @@ if not df_filtered.empty:
             file_name="films_selection.csv",
             mime="text/csv"
         )
-        log_action("button_click", "download_csv")
+
+# --- Téléchargement des logs utilisateur ---
+st.markdown("---")
+st.subheader("Logs d'utilisation")
+if os.path.exists("user_logs.csv"):
+    with open("user_logs.csv", "rb") as f:
+        st.download_button(
+            label="📥 Télécharger les logs d'utilisation",
+            data=f,
+            file_name="user_logs.csv",
+            mime="text/csv"
+        )
