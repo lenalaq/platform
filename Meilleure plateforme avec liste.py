@@ -61,8 +61,8 @@ def get_selected_pairs(selected_dict):
     return list(combinations(keys, 2))
 
 # --- MAIN ---
-csv_url = "https://raw.githubusercontent.com/lenalaq/platform/main/dataset_pour_analyse_clean.csv"
-df = load_data(csv_url)
+csv_path = r"C:\Users\llaqueyrer\OneDrive - Université Paris 1 Panthéon-Sorbonne\Documents\Universcine cartographie\dataset_pour_analyse_clean.csv"
+df = load_data(csv_path)
 
 st.title("Trouvez la plateforme qui correspond le plus à vos critères")
 
@@ -114,8 +114,10 @@ top_platform, example_title = get_top_platform_and_title(df_filtered)
 
 if top_platform is not None:
     nb_films = len(df_filtered)
-    st.success(f"Plateforme la plus fréquente (sur tous les critères) : **{top_platform}** ({nb_films} films)")
+    st.success(f"Plateforme la plus fréquente (sur tous les critères) : **{top_platform}**")
     st.write(f"Exemple de film : {example_title}")
+    st.write(f"Sur l'ensemble des catalogues, cela représente {nb_films} films.")
+    
 else:
     st.warning("Aucun film ne correspond aux 3 critères sélectionnés.")
     st.info("Recherche de la meilleure plateforme avec critères combinés 2 à 2...")
